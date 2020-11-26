@@ -11,23 +11,16 @@ class Matrix
     public:
         int nrows();
         int ncols();
-        Matrix();
-        Matrix (int, int, vector<vector<int>>);
+        Matrix (vector<vector<int>>);
         vector<vector<int>> vals();
         void printMatrix();
         void setVals(vector<vector<int>>);
 };
 
-Matrix::Matrix ()
+Matrix::Matrix (vector<vector<int>> v)
 {
-    n = 0;
-    m = 0;
-}
-
-Matrix::Matrix (int a, int b, vector<vector<int>> v)
-{
-    n = a;
-    m = b;
+    n = v.size();
+    m = v[0].size();
     values = v;
 }
 
@@ -67,6 +60,7 @@ class LinearAlgebra
 {
     public:
         Matrix add(Matrix, Matrix);
+        Matrix multiply(Matrix, Matrix);
 };
 
 Matrix LinearAlgebra::add(Matrix A, Matrix B)
@@ -85,7 +79,31 @@ Matrix LinearAlgebra::add(Matrix A, Matrix B)
         }
         v.push_back(row);
     }
-    return Matrix (A.nrows(), A.ncols(), v);
+    return Matrix (v);
+}
+
+Matrix LinearAlgebra::multiply(Matrix A, Matrix B)
+{
+    if (A.ncols() != B.nrows())
+    {
+        throw "Dimensions of A and B not compatible for multiplication";
+    }
+    vector<vector<int>> v;
+    for (int i = 0; i < A.nrows(); i++)
+    {
+        vector<int> row;
+        for (int j = 0; j < B.ncols(); j++)
+        {
+            int val = 0;
+            for (int k = 0; k < B.nrows(); k++)
+            {
+                val += A.vals()[i][k] * B.vals()[k][j];
+            }
+            row.push_back(val);
+        }
+        v.push_back(row);
+    }
+    return Matrix (v);
 }
 
 int main()
@@ -95,15 +113,15 @@ int main()
         {1,2},
         {3,4}
     };
-    Matrix A (2, 2, v1);
+    Matrix A (v1);
     vector<vector<int>> v2
     {
         {5,6},
         {7,8}
     };
-    Matrix B (2, 2, v2);
+    Matrix B (v2);
     LinearAlgebra la;
-    Matrix C = la.add(A, B);
+    Matrix C = la.multiply(A, B);
     C.printMatrix();
     return 0;
 }
